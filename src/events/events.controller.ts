@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -19,9 +19,20 @@ export class EventsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all events' })
+  @ApiQuery({ name: 'name', required: false, description: 'Filter by event name' })
+  @ApiQuery({ name: 'skip', required: false, description: 'Number of records to skip' })
+  @ApiQuery({ name: 'take', required: false, description: 'Number of records to take' })
   @ApiResponse({ status: 200, description: 'List of all events' })
-  findAll() {
-    return this.eventsService.findAll();
+  findAll(
+    @Query('name') name?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.eventsService.findAll({
+      name,
+      skip: skip ? parseInt(skip, 10) : undefined,
+      take: take ? parseInt(take, 10) : undefined,
+    });
   }
 
   @Get(':id')

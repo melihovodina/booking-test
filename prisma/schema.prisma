@@ -31,4 +31,8 @@ model Booking {
 
   event      Event     @relation("EventBookings", fields: [event_id], references: [id])
   user       User      @relation("UserBookings", fields: [user_id], references: [id])
+
+  @@index([event_id])
+  @@index([user_id])
+  @@unique([event_id, user_id])
 }

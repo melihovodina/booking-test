@@ -13,8 +13,14 @@ export class EventsService {
     });
   }
 
-  async findAll() {
-    return this.prisma.event.findMany();
+  async findAll(params?: { name?: string; skip?: number; take?: number }) {
+    const { name, skip, take } = params || {};
+
+    return this.prisma.event.findMany({
+      where: name ? { name: { contains: name, mode: 'insensitive' } } : {},
+      skip: skip,
+      take: take,
+    });
   }
 
   async findOne(id: number) {
@@ -28,7 +34,10 @@ export class EventsService {
   }
 
   async update(id: number, updateEventDto: UpdateEventDto) {
-    const event = await this.prisma.event.findUnique({ where: { id } });
+    const event = await this.prisma.event.findUnique({ 
+      where: { id },
+      select: { id: true }
+    });
 
     if (!event) {
       throw new NotFoundException('Event not found');
@@ -41,7 +50,10 @@ export class EventsService {
   }
 
   async remove(id: number) {
-    const event = await this.prisma.event.findUnique({ where: { id } });
+    const event = await this.prisma.event.findUnique({ 
+      where: { id },
+      select: { id: true }
+    });
 
     if (!event) {
       throw new NotFoundException('Event not found');
