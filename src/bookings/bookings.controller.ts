@@ -8,7 +8,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
-  @Post()
+  @Post('/reserve')
   @ApiOperation({ summary: 'Create a new booking' })
   @ApiBody({ type: CreateBookingDto })
   @ApiResponse({ status: 201, description: 'Booking created successfully' })
