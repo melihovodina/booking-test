@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
@@ -11,10 +11,15 @@ export class BookingsService {
 
     const event = await this.prisma.event.findUnique({ 
       where: { id: event_id },
-      select: { id: true }
+      select: { id: true, available_seats: true }
     });
+    
     if (!event) {
       throw new NotFoundException(`Event with id ${event_id} not found`);
+    }
+
+    if (event.available_seats <= 0) {
+      throw new BadRequestException('No available seats for this event');
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: user_id } });
@@ -31,21 +36,29 @@ export class BookingsService {
       throw new ConflictException('Booking for this user and event already exists');
     }
 
-    return this.prisma.booking.create({
+    const booking = await this.prisma.booking.create({
       data: {
         event: { connect: { id: event_id } },
         user: { connect: { id: user_id } },
       },
+      include: { event: true, user: true },
     });
+
+    await this.prisma.event.update({
+      where: { id: event_id },
+      data: { available_seats: { decrement: 1 } },
+    });
+
+    return booking;
   }
 
-   async findAll(params?: { skip?: number; take?: number; event_id?: number; user_id?: number }) {
+  async findAll(params?: { skip?: number; take?: number; event_id?: number; user_id?: number }) {
     const { skip, take, event_id, user_id } = params || {};
 
     return this.prisma.booking.findMany({
       where: {
-        event_id: event_id,
-        user_id: user_id,
+        event_id,
+        user_id,
       },
       skip,
       take,
@@ -83,17 +96,23 @@ export class BookingsService {
     return booking;
   }
 
-
   async remove(id: number) {
     const booking = await this.prisma.booking.findUnique({ 
       where: { id },
-      select: { id: true }
+      select: { id: true, event_id: true }
     });
 
     if (!booking) {
       throw new NotFoundException(`Booking with id ${id} not found`);
     }
 
-    return this.prisma.booking.delete({ where: { id } });
+    const deleted = await this.prisma.booking.delete({ where: { id } });
+
+    await this.prisma.event.update({
+      where: { id: booking.event_id },
+      data: { available_seats: { increment: 1 } },
+    });
+
+    return deleted;
   }
 }

@@ -12,4 +12,8 @@ export class CreateEventDto implements Prisma.EventCreateInput {
   @ApiProperty({ example: 130, description: 'Number of total seats' })
   @IsNumber()
   total_seats: number;
+
+  @ApiProperty({ example: 130, description: 'Number of available seats' })
+  @IsNumber()
+  available_seats: number;
 }

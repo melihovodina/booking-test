@@ -12,6 +12,7 @@ export class BookingsController {
   @ApiOperation({ summary: 'Create a new booking' })
   @ApiBody({ type: CreateBookingDto })
   @ApiResponse({ status: 201, description: 'Booking created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 404, description: 'Event or User not found' })
   @ApiResponse({ status: 409, description: 'Booking already exists' })
   create(@Body() createBookingDto: CreateBookingDto) {

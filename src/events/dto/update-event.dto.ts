@@ -8,4 +8,7 @@ export class UpdateEventDto extends PartialType(CreateEventDto) {
     
   @ApiPropertyOptional({ example: 150, description: 'Number of total seats' })
   total_seats?: number;
+
+  @ApiPropertyOptional({ example: 150, description: 'Number of available seats' })
+  available_seats?: number;
 }

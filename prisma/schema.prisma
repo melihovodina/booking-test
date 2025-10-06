@@ -9,28 +9,29 @@ datasource db {
 
 model User {
   id       Int       @id @default(autoincrement())
-  name     String
+  name     String    @db.VarChar(64)
   email    String    @unique
 
   bookings Booking[] @relation("UserBookings")
 }
 
 model Event {
-  id          Int        @id @default(autoincrement())
-  name        String
-  total_seats Int
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(256)
+  total_seats    Int
+  available_seats Int
 
-  bookings    Booking[]  @relation("EventBookings")
+  bookings       Booking[] @relation("EventBookings")
 }
 
 model Booking {
-  id         Int       @id @default(autoincrement())
-  event_id   Int
-  user_id    Int
-  created_at DateTime  @default(now())
+  id       Int      @id @default(autoincrement())
+  event_id Int
+  user_id  Int
+  created_at DateTime @default(now())
 
-  event      Event     @relation("EventBookings", fields: [event_id], references: [id])
-  user       User      @relation("UserBookings", fields: [user_id], references: [id])
+  event Event @relation("EventBookings", fields: [event_id], references: [id], onDelete: Cascade)
+  user  User  @relation("UserBookings", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([event_id])
   @@index([user_id])
